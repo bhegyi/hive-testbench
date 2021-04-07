@@ -1,7 +1,11 @@
+change-log
+==========
+This fork was made to fix a few issues with existing code to convert hive to beeline, modify pom.xml to update hadoop-client and commons-cli dependency versions, and also few other changes in .sql files to fix errors
+
 hive-testbench
 ==============
 
-A testbench for experimenting with Apache Hive at any data scale.
+A testbench for experimenting with Apache Hive at any data scale. Forked from hdp3 branch. 
 
 Overview
 ========
