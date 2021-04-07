@@ -1,5 +1,5 @@
 #!/bin/bash
-
+export DEBUG_SCRIPT=ON
 function usage {
 	echo "Usage: tpch-setup.sh scale_factor [temp_directory]"
 	exit 1
@@ -46,13 +46,18 @@ if [ $SCALE -eq 1 ]; then
 	exit 1
 fi
 
+#set hive command to run beeline shell
+HIVE="beeline -u 'jdbc:hive2://localhost:2181/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2?tez.queue.name=default' "
+
 # Do the actual data load.
-hdfs dfs -mkdir -p ${DIR}
 hdfs dfs -ls ${DIR}/${SCALE}/lineitem > /dev/null
 if [ $? -ne 0 ]; then
-	echo "Generating data at scale factor $SCALE."
+	echo "****** Generating data at scale factor $SCALE *******."
 	(cd tpch-gen; hadoop jar target/*.jar -d ${DIR}/${SCALE}/ -s ${SCALE})
 fi
+# ensure the ownership is given to hive user, since we are going to run SQLs as hive user. In some clusters, hdfs user is not allowed to run jobs.
+#hdfs dfs -chown -R hive /data/tpch/10
+
 hdfs dfs -ls ${DIR}/${SCALE}/lineitem > /dev/null
 if [ $? -ne 0 ]; then
 	echo "Data generation failed, exiting."
@@ -62,7 +67,7 @@ echo "TPC-H text data generation complete."
 
 # Create the text/flat tables as external tables. These will be later be converted to ORCFile.
 echo "Loading text data into external tables."
-runcommand "hive -i settings/load-flat.sql -f ddl-tpch/bin_flat/alltables.sql -d DB=tpch_text_${SCALE} -d LOCATION=${DIR}/${SCALE}"
+runcommand "$HIVE -i settings/load-flat.sql -f ddl-tpch/bin_flat/alltables.sql --hivevar DB=tpch_text_${SCALE} --hivevar LOCATION=${DIR}/${SCALE}"
 
 # Create the optimized tables.
 i=1
@@ -81,11 +86,11 @@ REDUCERS=$((test ${SCALE} -gt ${MAX_REDUCERS} && echo ${MAX_REDUCERS}) || echo $
 for t in ${TABLES}
 do
 	echo "Optimizing table $t ($i/$total)."
-	COMMAND="hive -i settings/load-${SCHEMA_TYPE}.sql -f ddl-tpch/bin_${SCHEMA_TYPE}/${t}.sql \
-	    -d DB=${DATABASE} \
-	    -d SOURCE=tpch_text_${SCALE} -d BUCKETS=${BUCKETS} \
-            -d SCALE=${SCALE} -d REDUCERS=${REDUCERS} \
-	    -d FILE=orc"
+	COMMAND="$HIVE -i settings/load-${SCHEMA_TYPE}.sql -f ddl-tpch/bin_${SCHEMA_TYPE}/${t}.sql \
+	    --hivevar DB=${DATABASE} \
+	    --hivevar SOURCE=tpch_text_${SCALE} --hivevar BUCKETS=${BUCKETS} \
+            --hivevar SCALE=${SCALE} --hivevar REDUCERS=${REDUCERS} \
+	    --hivevar FILE=orc"
 	runcommand "$COMMAND"
 	if [ $? -ne 0 ]; then
 		echo "Command failed, try 'export DEBUG_SCRIPT=ON' and re-running"
@@ -94,6 +99,6 @@ do
 	i=`expr $i + 1`
 done
 
-hive -i settings/load-${SCHEMA_TYPE}.sql -f ddl-tpch/bin_${SCHEMA_TYPE}/analyze.sql --database ${DATABASE}; 
+$HIVE -i settings/load-${SCHEMA_TYPE}.sql -f ddl-tpch/bin_${SCHEMA_TYPE}/analyze.sql --hivevar DB=${DATABASE}; 
 
 echo "Data loaded into database ${DATABASE}."
