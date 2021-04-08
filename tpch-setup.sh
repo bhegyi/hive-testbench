@@ -47,7 +47,7 @@ if [ $SCALE -eq 1 ]; then
 fi
 
 #set hive command to run beeline shell
-HIVE="beeline -u 'jdbc:hive2://localhost:2181/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2?tez.queue.name=default' "
+HIVE="beeline -n hive -u 'jdbc:hive2://localhost:2181/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2?tez.queue.name=default' "
 
 # Do the actual data load.
 hdfs dfs -ls ${DIR}/${SCALE}/lineitem > /dev/null
