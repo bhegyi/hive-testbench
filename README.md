@@ -1,11 +1,14 @@
 change-log
 ==========
-This fork was made to fix a few issues with existing code to convert hive to beeline, modify pom.xml to update hadoop-client and commons-cli dependency versions, and also few other changes in .sql files to fix errors
+Forked from public repo github.com/hortonworks/hive-testbench, and fixed following things. 
+- convert hive to beeline and use --hivevar to pass arguments
+- modify pom.xml to update hadoop-client and commons-cli dependency versions
+- few other changes in .sql files to fix errors
 
 hive-testbench
 ==============
 
-A testbench for experimenting with Apache Hive at any data scale. Forked from hdp3 branch. 
+A testbench for experimenting with Apache Hive at any data scale. Forked from hdp3 branch.
 
 Overview
 ========
@@ -34,7 +37,7 @@ All of these steps should be carried out on your Hadoop cluster.
 
   hive-testbench comes with data generators and sample queries based on both the TPC-DS and TPC-H benchmarks. You can choose to use either or both of these benchmarks for experiementation. More information about these benchmarks can be found at the Transaction Processing Council homepage.
 
-- Step 3: Compile and package the appropriate data generator.
+- Step 3: Compile and package the appropriate data generator. The build scripts probably should run as "root" user. This is because if "maven" does not exists, the build scripts try to install maven inorder to compile and buid the packages
 
   For TPC-DS, ```./tpcds-build.sh``` downloads, compiles and packages the TPC-DS data generator.
   For TPC-H, ```./tpch-build.sh``` downloads, compiles and packages the TPC-H data generator.
@@ -47,21 +50,27 @@ All of these steps should be carried out on your Hadoop cluster.
 
 - Step 5: Generate and load the data.
 
+**** Please run the setup scripts as "hive" user and chose a HDFS directory as the location to store generated data. It is just a suggestion as hive user has full access to create tables ****
+  
   The scripts ```tpcds-setup.sh``` and ```tpch-setup.sh``` generate and load data for TPC-DS and TPC-H, respectively. General usage is ```tpcds-setup.sh scale_factor [directory]``` or ```tpch-setup.sh scale_factor [directory]```
 
-  Some examples:
+**** The HDFS directory should exist and the "hive" user should have full access on the target directories ****
 
-  Build 1 TB of TPC-DS data: ```./tpcds-setup.sh 1000```
+Some examples:
 
-  Build 1 TB of TPC-H data: ```./tpch-setup.sh 1000```
+  Build 1 TB of TPC-DS data: ```./tpcds-setup.sh 1000  /user/hive/tpcds```
 
-  Build 100 TB of TPC-DS data: ```./tpcds-setup.sh 100000```
+  Build 1 TB of TPC-H data: ```./tpch-setup.sh 1000 /user/hive/tpch```
+
+  Build 100 TB of TPC-DS data: ```./tpcds-setup.sh 100000 /user/hive/tpcds```
 
   Build 30 TB of text formatted TPC-DS data: ```FORMAT=textfile ./tpcds-setup 30000```
 
   Build 30 TB of RCFile formatted TPC-DS data: ```FORMAT=rcfile ./tpcds-setup 30000```
-  
+
   Also check other parameters in setup scripts important one is BUCKET_DATA.
+
+
 
 - Step 6: Run queries.
 
