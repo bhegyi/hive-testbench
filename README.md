@@ -55,7 +55,9 @@ All of these steps should be carried out on your Hadoop cluster.
   The scripts ```tpcds-setup.sh``` and ```tpch-setup.sh``` generate and load data for TPC-DS and TPC-H, respectively. General usage is ```tpcds-setup.sh scale_factor [directory]``` or ```tpch-setup.sh scale_factor [directory]```
 
 **** The HDFS directory should exist and the "hive" user should have full access on the target directories ****
+
 **** PLEASE ENSURE THE CLUSTER HAS ENOUGH SPACE BEFORE CHOSING SCALE FACTOR ****
+
 **** Modify the scripts tpcds-setup.sh, tpch-setup.sh to ensure the "beeline connection string" is accurate. The ZK hostnames have to be replaced with your clusters ZK ****
 
 Some examples:
