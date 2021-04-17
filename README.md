@@ -74,6 +74,24 @@ Some examples:
 
   Also check other parameters in setup scripts important one is BUCKET_DATA.
 
+***** Please find instructions that can be run to complete data load Process.
+> On the edge node or admin node, run 
+> $ sudo su -
+> cd /opt
+> git clone https://github.com/arunnatva/hive-testbench
+> cd /opt/hive-testbench
+> ./tpcds-build.sh
+> ./tpch-build.sh
+> chmod -R hive /opt/hive-testbench
+> modify tez configuration to update io.sort.mb to 1024 and restart tez
+> su - hive
+> hdfs dfs -mkdir /user/hive/tpcds
+> hdfs dfs -mkdir /user/hive/tpch
+> Modify tpcds-setup.sh, tpch-setup.sh to replace "localhost" with a zookeeper node in the beeline connection string.
+> ./tpcds-setup.sh 2 /user/hive/tpcds
+> ./tpch-setup.sh 2 /user/hive/tpch
+> Once above setup scripts are run, you should see the hive tables created and loaded
+
 
 
 - Step 6: Run queries.
