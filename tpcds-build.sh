@@ -36,3 +36,4 @@ fi
 echo "Building TPC-DS Data Generator"
 (cd tpcds-gen; make)
 echo "TPC-DS Data Generator built, you can now use tpcds-setup.sh to generate data."
+

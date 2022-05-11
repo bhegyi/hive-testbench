@@ -29,6 +29,7 @@ TABLES="part partsupp supplier customer orders lineitem nation region"
 # Get the parameters.
 SCALE=$1
 DIR=$2
+HIVE_SERVER=$3
 BUCKETS=13
 if [ "X$DEBUG_SCRIPT" != "X" ]; then
 	set -x
@@ -47,7 +48,7 @@ if [ $SCALE -eq 1 ]; then
 fi
 
 #set hive command to run beeline shell
-HIVE="beeline -n hive -u 'jdbc:hive2://localhost:2181/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2?tez.queue.name=default' "
+HIVE="beeline -n hive -u 'jdbc:hive2://${HIVE_SERVER}:10000/;principal=hive/_HOST@ROOT.HWX.SITE;ssl=True' "
 
 # Do the actual data load.
 hdfs dfs -ls ${DIR}/${SCALE}/lineitem > /dev/null
